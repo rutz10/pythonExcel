@@ -1,0 +1,28 @@
+import pandas as pd
+
+def compare_workbooks(file_A, file_B):
+    # Load both workbooks
+    wb_A = pd.ExcelFile(file_A)
+    wb_B = pd.ExcelFile(file_B)
+    
+    # Iterate through the sheets in workbook A
+    for sheet_name in wb_A.sheet_names:
+        if sheet_name in wb_B.sheet_names:
+            df_A = pd.read_excel(file_A, sheet_name=sheet_name)
+            df_B = pd.read_excel(file_B, sheet_name=sheet_name)
+            
+            # Compare columns and values
+            for column in df_A.columns:
+                if column in df_B.columns:
+                    mismatches = df_A[column] != df_B[column]
+                    if mismatches.any():
+                        for index, mismatch in mismatches.iteritems():
+                            if mismatch:
+                                print(f"Mismatch found in Sheet: {sheet_name}, Column: {column}, Row: {index + 2}, A: {df_A.loc[index, column]}, B: {df_B.loc[index, column]}")
+                else:
+                    print(f"Column '{column}' not found in Sheet '{sheet_name}' in workbook B")
+        else:
+            print(f"Sheet '{sheet_name}' not found in workbook B")
+
+# Example usage
+compare_workbooks('workbook_A.xlsx', 'workbook_B.xlsx')
