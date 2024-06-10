@@ -1,28 +1,42 @@
+import os
 import pandas as pd
 
-def compare_workbooks(file_A, file_B):
+def compare_workbooks(source_file, target_file):
     # Load both workbooks
-    wb_A = pd.ExcelFile(file_A)
-    wb_B = pd.ExcelFile(file_B)
+    reference_workbook = pd.ExcelFile(source_file)
+    comparison_workbook = pd.ExcelFile(target_file)
     
-    # Iterate through the sheets in workbook A
-    for sheet_name in wb_A.sheet_names:
-        if sheet_name in wb_B.sheet_names:
-            df_A = pd.read_excel(file_A, sheet_name=sheet_name)
-            df_B = pd.read_excel(file_B, sheet_name=sheet_name)
+    # Iterate through the sheets in the reference workbook
+    for sheet_name in reference_workbook.sheet_names:
+        if sheet_name in comparison_workbook.sheet_names:
+            reference_df = pd.read_excel(source_file, sheet_name=sheet_name)
+            comparison_df = pd.read_excel(target_file, sheet_name=sheet_name)
             
             # Compare columns and values
-            for column in df_A.columns:
-                if column in df_B.columns:
-                    mismatches = df_A[column] != df_B[column]
+            for column in reference_df.columns:
+                if column in comparison_df.columns:
+                    mismatches = reference_df[column] != comparison_df[column]
                     if mismatches.any():
                         for index, mismatch in mismatches.iteritems():
                             if mismatch:
-                                print(f"Mismatch found in Sheet: {sheet_name}, Column: {column}, Row: {index + 2}, A: {df_A.loc[index, column]}, B: {df_B.loc[index, column]}")
+                                print(f"Mismatch found in File: {source_file}, Sheet: {sheet_name}, Column: {column}, Row: {index + 2}, Reference: {reference_df.loc[index, column]}, Comparison: {comparison_df.loc[index, column]}")
                 else:
-                    print(f"Column '{column}' not found in Sheet '{sheet_name}' in workbook B")
+                    print(f"Column '{column}' not found in Sheet '{sheet_name}' in comparison workbook")
         else:
-            print(f"Sheet '{sheet_name}' not found in workbook B")
+            print(f"Sheet '{sheet_name}' not found in comparison workbook")
+
+def compare_directories(source_dir, target_dir):
+    # List all Excel files in both directories
+    source_files = [f for f in os.listdir(source_dir) if f.endswith('.xlsx')]
+    target_files = [f for f in os.listdir(target_dir) if f.endswith('.xlsx')]
+    
+    # Compare each file in source directory with corresponding file in target directory
+    for source_file in source_files:
+        target_file = os.path.join(target_dir, source_file)
+        if source_file in target_files:
+            compare_workbooks(os.path.join(source_dir, source_file), target_file)
+        else:
+            print(f"File '{source_file}' not found in target directory")
 
 # Example usage
-compare_workbooks('workbook_A.xlsx', 'workbook_B.xlsx')
+compare_directories('source_directory_path', 'target_directory_path')
