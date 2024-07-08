@@ -1,0 +1,27 @@
+import re
+
+def compare_directories(source_dir, target_dir, output_file):
+    # Clear the output file at the start
+    open(output_file, 'w').close()
+
+    # List all Excel files in both directories
+    source_files = [f for f in os.listdir(source_dir) if f.endswith('.xlsx')]
+    target_files = [f for f in os.listdir(target_dir) if f.endswith('.xlsx')]
+    
+    # Compare each file in source directory with corresponding file in target directory
+    for source_file in source_files:
+        # Extract base filename without version number
+        base_filename = re.sub(r' v\d+\.\d+', '', source_file)
+        
+        # Search for a matching target file based on the base filename
+        matching_target_file = None
+        for target_file in target_files:
+            if re.sub(r' v\d+\.\d+', '', target_file) == base_filename:
+                matching_target_file = os.path.join(target_dir, target_file)
+                break
+        
+        if matching_target_file:
+            compare_workbooks(os.path.join(source_dir, source_file), matching_target_file, output_file)
+        else:
+            with open(output_file, 'a') as f:
+                f.write(f"File '{source_file}' not found in target directory\n")
