@@ -15,34 +15,49 @@ def extract_xsd_paths(xsd_file, output_csv):
     namespace = {'xs': 'http://www.w3.org/2001/XMLSchema'}
     paths = []
 
-    def traverse(element, current_path=""):
+    def get_element_name(element):
+        name = element.get("name")
+        if not name: # Handle anonymous complexTypes and simpleTypes
+            type_attr = element.get("type")
+            if type_attr:
+                name = type_attr
+            else:
+                parent_tag = element.getparent().tag.replace(f"{{{namespace['xs']}}}", "")
+                if parent_tag == "element":
+                    name = element.getparent().get("name") + "_content" # Add _content to make it unique
+                else:
+                    name = "anonymous"
+        return name
+
+    def traverse(element, current_path=None):
         tag = element.tag.replace(f"{{{namespace['xs']}}}", "")
 
+        if current_path is None:
+            current_path = []
+        
         if tag in ("element", "attribute"):
-            name = element.get("name")
-            if name:
-                full_path = f"{current_path}/{name}" if current_path else name
-                paths.append({"fieldname": name, "path": full_path})
-        elif tag == "simpleType":  # Handle simpleType
-            name = element.get("name")
-            if name and current_path: # Only add if it has a name and is nested
-                full_path = f"{current_path}/{name}"
-                paths.append({"fieldname": name, "path": full_path})
+            name = get_element_name(element)
+            current_path.append(name)
+            full_path = "/".join(current_path)
+            paths.append({"fieldname": name, "path": full_path})
+            current_path.pop() # important to remove the current element from path before going to next element
 
-        # Improved complexType handling (handles both named and inline):
-        if tag == "complexType" or (tag == "element" and element.find(f".//{{{namespace['xs']}}}complexType") is not None):
-            complex_type_element = element if tag == "complexType" else element.find(f".//{{{namespace['xs']}}}complexType")
-            for child in complex_type_element:
-                if child.tag.replace(f"{{{namespace['xs']}}}", "") in ("sequence", "choice", "all"):
-                    for grandchild in child:
-                        traverse(grandchild, current_path)
-                else:
-                    traverse(child, current_path)
+        elif tag in ("complexType", "simpleType"):
+            name = get_element_name(element)
+            if name != "anonymous":
+                current_path.append(name)
+
+            for child in element:
+                traverse(child, current_path)
+            
+            if name != "anonymous":
+                 current_path.pop()
+
         elif tag in ("sequence", "choice", "all"):
             for child in element:
                 traverse(child, current_path)
         else:
-            for child in element:
+             for child in element:
                 traverse(child, current_path)
 
     # Find top-level elements
@@ -59,9 +74,7 @@ def extract_xsd_paths(xsd_file, output_csv):
     except Exception as e:
         print(f"Error writing to CSV: {e}")
 
-
-# Example usage (using an xsd with inline complex types):
-xsd_file = "inline_complex_types.xsd"
-output_csv = "inline_xsd_paths.csv"
+# Example usage (using the nested.xsd from before):
+xsd_file = "nested.xsd"
+output_csv = "nested_xsd_paths.csv"
 extract_xsd_paths(xsd_file, output_csv)
-
