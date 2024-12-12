@@ -1,16 +1,7 @@
 import xml.etree.ElementTree as ET
 import csv
-import os
 
 def extract_xsd_paths(xsd_file, output_csv):
-    """
-    Extracts field names and their full paths from an XSD file and writes them to a CSV.
-
-    Args:
-        xsd_file: Path to the XSD file.
-        output_csv: Path to the output CSV file.
-    """
-
     try:
         tree = ET.parse(xsd_file)
         root = tree.getroot()
@@ -21,43 +12,47 @@ def extract_xsd_paths(xsd_file, output_csv):
         print(f"Error: XSD file not found: {xsd_file}")
         return
 
-    namespace = {'xs': 'http://www.w3.org/2001/XMLSchema'}  # Define the namespace
-
+    namespace = {'xs': 'http://www.w3.org/2001/XMLSchema'}
     paths = []
 
     def traverse(element, current_path=""):
-        tag = element.tag.replace(f"{{{namespace['xs']}}}", "") # Remove namespace
-        if tag in ("element", "attribute"): # Extract only elements and attributes
+        tag = element.tag.replace(f"{{{namespace['xs']}}}", "")
+
+        if tag in ("element", "attribute"):
             name = element.get("name")
             if name:
                 full_path = f"{current_path}/{name}" if current_path else name
                 paths.append({"fieldname": name, "path": full_path})
-        
-        # Handle complexType and sequence within complexType
-        if tag == "complexType":
-            for child in element:
-                if child.tag.replace(f"{{{namespace['xs']}}}", "") == "sequence":
+        elif tag == "simpleType":  # Handle simpleType
+            name = element.get("name")
+            if name and current_path: # Only add if it has a name and is nested
+                full_path = f"{current_path}/{name}"
+                paths.append({"fieldname": name, "path": full_path})
+
+        # Improved complexType handling (handles both named and inline):
+        if tag == "complexType" or (tag == "element" and element.find(f".//{{{namespace['xs']}}}complexType") is not None):
+            complex_type_element = element if tag == "complexType" else element.find(f".//{{{namespace['xs']}}}complexType")
+            for child in complex_type_element:
+                if child.tag.replace(f"{{{namespace['xs']}}}", "") in ("sequence", "choice", "all"):
                     for grandchild in child:
                         traverse(grandchild, current_path)
                 else:
                     traverse(child, current_path)
-        elif tag == "sequence":
+        elif tag in ("sequence", "choice", "all"):
             for child in element:
                 traverse(child, current_path)
         else:
-            for child in element: # Generic traversal for other tags
+            for child in element:
                 traverse(child, current_path)
 
-    # Find the root element (usually a schema element)
-    for child in root:
-        if child.tag.replace(f"{{{namespace['xs']}}}", "") == "element":
-            traverse(child)
+    # Find top-level elements
+    for element in root:
+        traverse(element)
 
     try:
         with open(output_csv, 'w', newline='', encoding='utf-8') as csvfile:
             fieldnames = ['fieldname', 'path']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
             writer.writeheader()
             writer.writerows(paths)
         print(f"Paths written to {output_csv}")
@@ -65,10 +60,8 @@ def extract_xsd_paths(xsd_file, output_csv):
         print(f"Error writing to CSV: {e}")
 
 
-# Example usage:
-xsd_file = "your_xsd_file.xsd"  # Replace with your XSD file path
-output_csv = "xsd_paths.csv"
+# Example usage (using an xsd with inline complex types):
+xsd_file = "inline_complex_types.xsd"
+output_csv = "inline_xsd_paths.csv"
 extract_xsd_paths(xsd_file, output_csv)
 
-xsd_file = "nested.xsd" # The nested example from previous response
-extract_xsd_paths(xsd_file, "nested_xsd_paths.csv")
