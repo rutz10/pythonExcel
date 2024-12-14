@@ -1,0 +1,130 @@
+import csv
+import re
+import random
+import json
+import os
+from datetime import datetime, timedelta
+
+def read_csv_data(csv_file):
+    """Reads CSV data into a list of dictionaries."""
+    data = []
+    try:
+        with open(csv_file, 'r', newline='', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            if 'fieldname' not in reader.fieldnames or 'Completepath' not in reader.fieldnames:
+                print("CSV file must have 'fieldname' and 'Completepath' columns.")
+                return None
+            for row in reader:
+                data.append(row)
+    except FileNotFoundError:
+        print(f"File not found: {csv_file}")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    return data
+
+def extract_fields_and_arrays(csv_data):
+    """Extracts fields and arrays from CSV data."""
+    fields = set()
+    arrays = set()
+    if csv_data is None:
+        return None, None
+
+    for row in csv_data:
+        fieldname = row['fieldname']
+        complete_path = row['Completepath']
+        fields.add(fieldname)
+        path_parts = complete_path.split('/')
+
+        for i in range(len(path_parts) - 1):
+            if re.match(r"[a-zA-Z]+s$", path_parts[i]) and path_parts[i + 1].lower() == path_parts[i][:-1].lower():
+                arrays.add(path_parts[i])
+
+    return fields, arrays
+
+def create_dummy_value(field_name):
+    """Generates more diverse dummy values based on field name."""
+    if "Id" in field_name or "id" in field_name:
+        return random.randint(1, 1000)   
+    elif "Salary" in field_name:
+        return round(random.uniform(30000, 100000), 2)
+    elif "Type" in field_name:
+        return random.choice(["Active", "Inactive", "Pending", "Completed"])
+    elif "Date" in field_name or "date" in field_name:
+        start_date = datetime(2023, 1, 1)
+        random_days = random.randint(0, 365)
+        return (start_date + timedelta(days=random_days)).strftime('%Y-%m-%d') # Dummy date
+    
+    else:
+        return random.choice([True, False])  # Default to boolean
+
+def generate_dummy_data(fields, arrays, csv_data):
+    """Generates dummy JSON data with improved path handling."""
+    if csv_data is None:
+        return None
+
+    dummy_json = {}
+
+    for row in csv_data:
+        complete_path = row['Completepath']
+        fieldname = row['fieldname']
+        path_parts = complete_path.split('/')
+
+        current_level = dummy_json
+        path_index = 0  # More descriptive variable name
+        while path_index < len(path_parts) - 1:
+            current_part = path_parts[path_index]
+            next_part = path_parts[path_index + 1] if path_index + 1 < len(path_parts) else None
+
+            if next_part and re.match(r"[a-zA-Z]+s$", current_part) and next_part.lower() == current_part[:-1].lower():
+                array_name = current_part
+                if array_name not in current_level:
+                    current_level[array_name] = []
+
+                while len(current_level[array_name]) == 0:
+                    current_level[array_name].append({})
+
+                current_level = current_level[array_name][0]
+                path_index += 2  # Skip the singular form
+            else:
+                if current_part not in current_level:
+                    current_level[current_part] = {}
+                current_level = current_level[current_part]
+                path_index += 1
+
+        current_level[fieldname] = create_dummy_value(fieldname)
+
+    return dummy_json
+
+def print_results(fields, arrays):
+    """Helper function to print fields and arrays."""
+    if fields is None or arrays is None:
+        return
+
+    print("Fields:")
+    for field in sorted(list(fields)):
+        print(f"- {field}")
+
+    print("\nArrays:")
+    for array in sorted(list(arrays)):
+        print(f"- {array}")
+
+
+# Example usage:
+csv_file_path = 'input.csv'  # Replace with your CSV file name
+
+csv_data = read_csv_data(csv_file_path)
+
+if csv_data is None:
+    exit()
+
+fields, arrays = extract_fields_and_arrays(csv_data)
+if fields is None or arrays is None:
+    exit()
+
+print_results(fields, arrays)
+
+dummy_json_data = generate_dummy_data(fields, arrays, csv_data)
+if dummy_json_data is not None:
+    print(json.dumps(dummy_json_data, indent=4))
