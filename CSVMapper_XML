@@ -1,0 +1,60 @@
+import csv
+
+def generate_output(csv_file):
+    """Generates output based on the provided CSV file."""
+
+    output_list = []
+    output_list.append(["jPath", "xPath", "isList", "jsonType", "xmlType", "expression", "namespace", "parentXPath"])
+
+    with open(csv_file, 'r', newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            fieldname = row['fieldname']
+            path = row['path']
+
+            parts = path.split('/')
+            jpath_parts = []
+            is_list = "No"
+            parent_xpath = "$"
+
+            for i, part in enumerate(parts):
+                if i == 0:
+                    jpath_parts.append("$")
+                else:
+                    jpath_parts.append(part)
+
+                if i > 0:
+                    parent_part = parts[i-1]
+                    if parent_part + "s" == part or part + "s" == parent_part:
+                        is_list = "Yes"
+                        jpath_parts[i-1] = parent_part + "[*]" # Corrected: Use parent_part
+
+                current_jpath = ".".join(jpath_parts)
+
+                if i == len(parts) - 1:  # Only for the innermost child
+                    if len(parts) > 0:
+                        parent_xpath = parts[-2]
+                    
+                    if len(parts) > 1: # Check if has a parent
+                        parent_xpath = parts[i-2] +"/" + parts[-2]                        
+                    
+                    output_list.append([current_jpath, fieldname, is_list, "String", "String", "", "Default", parent_xpath])
+
+            is_list = "No"
+
+    return output_list
+
+def write_output_csv(output_list, output_file):
+    """Writes the output list to a CSV file."""
+    with open(output_file, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(output_list)
+
+# Example usage:
+input_csv = 'input.csv'  # Replace with your input CSV file
+output_csv = 'outpusst.csv'
+
+output = generate_output(input_csv)
+write_output_csv(output, output_csv)
+
+print(f"Output written to {output_csv}")
