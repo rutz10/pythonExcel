@@ -1,0 +1,117 @@
+{
+    "type": "struct",
+    "fields": [
+        {
+            "name": "field1",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+        },
+        {
+            "name": "field2",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+        },
+        {
+            "name": "nested_struct_level1",
+            "type": {
+                "type": "struct",
+                "fields": [
+                    {
+                        "name": "inner_field1",
+                        "type": "boolean",
+                        "nullable": true,
+                        "metadata": {}
+                    },
+                    {
+                        "name": "inner_array_level2",
+                        "type": {
+                            "type": "array",
+                            "elementType": {
+                                "type": "struct",
+                                "fields": [
+                                    {
+                                        "name": "deeper_field1",
+                                        "type": "float",
+                                        "nullable": true,
+                                        "metadata": {}
+                                    },
+                                    {
+                                        "name": "deeper_struct_level3",
+                                        "type": {
+                                            "type": "struct",
+                                            "fields": [
+                                                {
+                                                    "name": "even_deeper_array_level4",
+                                                    "type": {
+                                                        "type": "array",
+                                                        "elementType": "string",
+                                                        "containsNull": true
+                                                    },
+                                                    "nullable": true,
+                                                    "metadata": {}
+                                                },
+                                                {
+                                                    "name": "another_inner_field",
+                                                    "type": "integer",
+                                                    "nullable": true,
+                                                    "metadata": {}
+                                                }
+                                            ]
+                                        },
+                                        "nullable": true,
+                                        "metadata": {}
+                                    }
+                                ]
+                            },
+                            "containsNull": true
+                        },
+                        "nullable": true,
+                        "metadata": {}
+                    },
+                    {
+                        "name": "another_inner_field_level2",
+                        "type": "string",
+                        "nullable": true,
+                        "metadata": {}
+                    }
+                ]
+            },
+            "nullable": true,
+            "metadata": {}
+        },
+        {
+            "name": "top_level_array",
+            "type": {
+                "type": "array",
+                "elementType": {
+                    "type": "struct",
+                    "fields": [
+                        {
+                            "name": "array_element_field1",
+                            "type": "string",
+                            "nullable": true,
+                            "metadata": {}
+                        },
+                        {
+                            "name": "array_element_field2",
+                            "type": "integer",
+                            "nullable": true,
+                            "metadata": {}
+                        }
+                    ]
+                },
+                "containsNull": true
+            },
+            "nullable": true,
+            "metadata": {}
+        },
+        {
+            "name": "another_top_level_field",
+            "type": "float",
+            "nullable": true,
+            "metadata": {}
+        }
+    ]
+}

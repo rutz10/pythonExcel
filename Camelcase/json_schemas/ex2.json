@@ -1,0 +1,112 @@
+{
+    "type": "struct",
+    "fields": [
+      {
+        "name": "string_field",
+        "type": "string",
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "integer_field",
+        "type": "integer",
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "long_field",
+        "type": "long",
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "float_field",
+        "type": "float",
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "double_field",
+        "type": "double",
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "boolean_field",
+        "type": "boolean",
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "binary_field",
+        "type": "binary",
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "date_field",
+        "type": "date",
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "timestamp_field",
+        "type": "timestamp",
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "decimal_field",
+        "type": {
+          "type": "decimal",
+          "precision": 10,
+          "scale": 2
+        },
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "array_field",
+        "type": {
+          "type": "array",
+          "elementType": "string",
+          "containsNull": true
+        },
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "map_field",
+        "type": {
+          "type": "map",
+          "keyType": "string",
+          "valueType": "integer",
+          "valueContainsNull": true
+        },
+        "nullable": true,
+        "metadata": {}
+      },
+      {
+        "name": "struct_field",
+        "type": {
+          "type": "struct",
+          "fields": [
+            {
+              "name": "nested_string",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "nested_int",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            }
+          ]
+        },
+        "nullable": true,
+        "metadata": {}
+      }
+    ]
+  }

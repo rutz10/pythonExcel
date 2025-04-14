@@ -1,0 +1,15 @@
+string_field
+integer_field
+long_field
+float_field
+double_field
+boolean_field
+binary_field
+date_field
+timestamp_field
+decimal_field
+array_field
+map_field
+struct_field
+nested_string
+nested_int

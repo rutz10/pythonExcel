@@ -1,0 +1,14 @@
+field1, field1
+field2, field2
+nested_struct_level1, nested_struct_level1
+inner_field1, inner_field1
+inner_array_level2, inner_array_level2
+deeper_field1, deeper_field1
+deeper_struct_level3, deeper_struct_level3
+even_deeper_array_level4, even_deeper_array_level4
+another_inner_field, another_inner_field
+another_inner_field_level2, another_inner_field_level2
+top_level_array, top_level_array
+array_element_field1, array_element_field1
+array_element_field2, array_element_field2
+another_top_level_field, another_top_level_field
