@@ -1,0 +1,34 @@
+<root>
+  <users>
+    <user>
+      <id>1</id>
+      <profile>
+        <name>John</name>
+        <contacts>
+          <email>john@example.com</email>
+        </contacts>
+      </profile>
+      <roles>
+        <role>admin</role>
+      </roles>
+    </user>
+    <user>
+      <id>2</id>
+      <profile>
+        <name>Jane</name>
+        <contacts>
+          <email>jane@example.com</email>
+        </contacts>
+      </profile>
+      <roles>
+        <role>user</role>
+      </roles>
+    </user>
+  </users>
+  <settings>
+    <theme>dark</theme>
+    <notifications>
+      <email>true</email>
+    </notifications>
+  </settings>
+</root>
